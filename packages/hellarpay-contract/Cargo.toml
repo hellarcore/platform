@@ -1,0 +1,11 @@
+[package]
+name = "hellarpay-contract"
+description = "HellarPay data contract schema and tools"
+version = "2.0.15"
+edition = "2021"
+rust-version = "1.73"
+license = "MIT"
+
+[dependencies]
+serde_json = { version = "1.0" }
+platform-value = { path = "../rs-platform-value" }

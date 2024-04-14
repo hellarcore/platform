@@ -1,0 +1,85 @@
+{
+  "name": "@hellarpro/hapi",
+  "private": true,
+  "version": "2.0.15",
+  "description": "A decentralized API for the Hellar network",
+  "scripts": {
+    "api": "node scripts/api.js",
+    "core-streams": "node scripts/core-streams.js",
+    "test": "yarn run test:coverage && yarn run test:functional",
+    "test:coverage": "nyc --check-coverage --lines=50 --branches=50 --functions=50 yarn run mocha --recursive test/unit test/integration",
+    "test:unit": "mocha --recursive test/unit",
+    "test:integration": "mocha --recursive test/integration",
+    "test:functional": "mocha --recursive test/functional",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "oas:setversion": "jq -r .version package.json | xargs -I{} sed -i \"s/version:.*/version: '{}',/\" doc/swaggerDef.js",
+    "oas:generate": "yarn run oas:setversion && swagger-jsdoc -d doc/swaggerDef.js lib/rpcServer/**/*.js -o doc/swagger.json"
+  },
+  "ultra": {
+    "concurrent": [
+      "test"
+    ]
+  },
+  "nyc": {
+    "include": [
+      "lib/**/*.js"
+    ],
+    "exclude": [
+      "**/node_modules/**",
+      "**/test/**",
+      "**/coverage/**"
+    ],
+    "all": true
+  },
+  "dependencies": {
+    "@hellarpro/bls": "~1.2.9",
+    "@hellarpro/hapi-grpc": "workspace:*",
+    "@hellarpro/hellarcore-lib": "~0.21.0",
+    "@hellarpro/hellard-rpc": "^18.2.0",
+    "@hellarpro/grpc-common": "workspace:*",
+    "@hellarpro/wasm-hpp": "workspace:*",
+    "@grpc/grpc-js": "1.4.4",
+    "@pshenmic/zeromq": "6.0.0-beta.22",
+    "ajv": "^8.6.0",
+    "bs58": "^4.0.1",
+    "cbor": "^8.0.0",
+    "dotenv": "^8.6.0",
+    "dotenv-expand": "^5.1.0",
+    "dotenv-safe": "^8.2.0",
+    "google-protobuf": "^3.12.2",
+    "jayson": "^4.1.0",
+    "lohellar": "^4.17.21",
+    "lru-cache": "^5.1.1",
+    "pino": "^8.16.2",
+    "pino-pretty": "^10.2.3",
+    "ws": "^7.5.3"
+  },
+  "devDependencies": {
+    "@hellarpro/hapi-client": "workspace:*",
+    "@hellarpro/dp-services-ctl": "github:hellarpro/js-dp-services-ctl#v0.19-dev",
+    "chai": "^4.3.10",
+    "chai-as-promised": "^7.1.1",
+    "dirty-chai": "^2.0.1",
+    "eslint": "^8.53.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.29.0",
+    "mocha": "^10.2.0",
+    "mocha-sinon": "^2.1.2",
+    "nyc": "^15.1.0",
+    "semver": "^7.5.3",
+    "sinon": "^17.0.1",
+    "sinon-chai": "^3.7.0",
+    "swagger-jsdoc": "^3.5.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hellarpro/hapi.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hellarpro/hapi/issues"
+  },
+  "homepage": "https://github.com/hellarpro/hapi#readme"
+}

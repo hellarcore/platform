@@ -1,0 +1,13 @@
+[package]
+name = "simple-signer"
+version = "2.0.15"
+edition = "2024"
+rust-version = "1.73"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = { version = "1.0.70" }
+bincode = { version = "2.0.0-rc.3", features = ["serde"] }
+hellarcore-rpc = { git = "https://github.com/hellarpay/rust-hellarcore-rpc", branch = "master" }
+hpp = { path = "../rs-hpp", features = ["abci"] }

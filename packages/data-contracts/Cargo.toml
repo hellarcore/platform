@@ -1,0 +1,16 @@
+[package]
+name = "data-contracts"
+description = "Hellar Platform system data contracts"
+version = "2.0.15"
+edition = "2024"
+rust-version = "1.73"
+license = "MIT"
+
+[dependencies]
+serde_json = { version = "1.0" }
+withdrawals-contract = { path = "../withdrawals-contract" }
+masternode-reward-shares-contract = { path = "../masternode-reward-shares-contract" }
+hpns-contract = { path = "../hpns-contract" }
+hellarpay-contract = { path = "../hellarpay-contract" }
+feature-flags-contract = { path = "../feature-flags-contract" }
+platform-value = { path = "../rs-platform-value" }

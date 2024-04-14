@@ -1,0 +1,62 @@
+hellarpay-contract: &hellarpay-contract
+  - .github/workflows/tests*
+  - packages/hellarpay-contract/**
+
+masternode-reward-shares-contract: &masternode-reward-shares-contract
+  - .github/workflows/tests*
+  - packages/masternode-reward-shares-contract/**
+
+withdrawals-contract: &withdrawals-contract
+  - .github/workflows/tests*
+  - packages/withdrawals-contract/**
+
+hpns-contract: &hpns-contract
+  - .github/workflows/tests*
+  - packages/hpns-contract/**
+
+hpp: &hpp
+  - .github/workflows/tests*
+  - packages/rs-hpp/**
+  - *hellarpay-contract
+  - *masternode-reward-shares-contract
+  - *hpns-contract
+  - *withdrawals-contract
+  - packages/rs-platform-serialization/**
+  - packages/rs-platform-serialization-derive/**
+  - packages/rs-platform-value/**
+  - packages/rs-platform-value-convertible/**
+  - packages/rs-platform-version/**
+  - packages/rs-platform-versioning/**
+
+wasm-hpp:
+  - .github/workflows/tests*
+  - packages/wasm-hpp/**
+  - *hpp
+
+drive: &drive
+  - .github/workflows/tests*
+  - packages/rs-drive/**
+  - *hpp
+
+drive-abci:
+  - .github/workflows/tests*
+  - packages/rs-drive-abci/**
+  - *drive
+
+hapi-grpc: &hapi_grpc
+  - .github/workflows/tests*
+  - packages/rs-platform-version/**
+  - packages/rs-hapi-grpc-macros/**
+  - packages/hapi-grpc/**
+
+rs-hapi-client: &hapi_client
+  - .github/workflows/tests*
+  - packages/rs-hapi-client/**
+  - *hapi_grpc
+
+rs-sdk:
+  - .github/workflows/tests*
+  - packages/rs-drive-proof-verifier/**
+  - packages/rs-sdk/**
+  - *hapi_client
+  - *drive

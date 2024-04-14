@@ -1,0 +1,79 @@
+'@hellarpro/hellarpay-contract': &hellarpay-contract
+  - .github/workflows/tests*
+  - packages/hellarpay-contract/**
+
+'@hellarpro/masternode-reward-shares-contract': &masternode-reward-shares-contract
+  - .github/workflows/tests*
+  - packages/masternode-reward-shares-contract/**
+
+'@hellarpro/withdrawals-contract': &withdrawals-contract
+  - .github/workflows/tests*
+  - packages/withdrawals-contract/**
+
+'@hellarpro/hpns-contract': &hpns-contract
+  - .github/workflows/tests*
+  - packages/hpns-contract/**
+
+'@hellarpro/grpc-common': &grpc-common
+  - .github/workflows/tests*
+  - packages/js-grpc-common/**
+
+'@hellarpro/wasm-hpp': &wasm-hpp
+  - .github/workflows/tests*
+  - packages/wasm-hpp/**
+  - *hellarpay-contract
+  - *masternode-reward-shares-contract
+  - *hpns-contract
+  - *withdrawals-contract
+  - packages/rs-platform-serialization/**
+  - packages/rs-platform-serialization-derive/**
+  - packages/rs-platform-value/**
+  - packages/rs-platform-value-convertible/**
+  - packages/rs-platform-version/**
+  - packages/rs-platform-versioning/**
+  - packages/rs-hpp/**
+
+'@hellarpro/hapi-grpc': &hapi-grpc
+  - .github/workflows/tests*
+  - packages/hapi-grpc/**
+  - *grpc-common
+
+'@hellarpro/hellar-spv': &hellar-spv
+  - .github/workflows/tests*
+  - packages/hellar-spv/**
+
+'@hellarpro/hapi':
+  - .github/workflows/tests*
+  - packages/hapi/**
+  - *wasm-hpp
+  - *hapi-grpc
+  - *hellar-spv
+
+'@hellarpro/hapi-client': &hapi-client
+  - .github/workflows/tests*
+  - packages/js-hapi-client/**
+  - *hapi-grpc
+  - *hellar-spv
+  - *wasm-hpp
+
+'@hellarpro/wallet-lib': &wallet-lib
+  - .github/workflows/tests*
+  - packages/wallet-lib/**
+  - *hapi-client
+  - *wasm-hpp
+
+hellar: &hellar
+  - .github/workflows/tests*
+  - packages/js-hellar-sdk/**
+  - *hapi-client
+  - *wallet-lib
+
+hellarmate:
+  - .github/workflows/tests*
+  - packages/hellarmate/**
+  - *hellar
+
+'@hellarpro/platform-test-suite':
+  - .github/workflows/tests*
+  - packages/platform-test-suite/**
+  - *hellar

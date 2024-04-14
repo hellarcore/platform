@@ -1,0 +1,25 @@
+<p align="center">
+  <a href="https://hellarplatform.readme.io/docs/introduction-what-is-hellar-platform/">
+    <img alt="babel" src="https://media.hellar.io/wp-content/uploads/hellar_digital-cash_logo_2018_rgb_for_screens.png" width="546">
+  </a>
+</p>
+
+<p align="center">
+  Seriously fast decentralized applications for the Hellar network
+</p>
+
+<p align="center">
+  <a href="https://github.com/hellarpay/platform/actions/workflows/all-packages.yml"><img alt="GitHub CI Status" src="https://github.com/hellarpay/platform/actions/workflows/all-packages.yml/badge.svg"></a>
+  <a href="https://chat.hellardevs.org/"><img alt="Devs Chat" src="https://img.shields.io/badge/discord-Dev_chat-738adb"></a>
+  <a href="https://discordapp.com/invite/PXbUxJB"><img alt="General Chat" src="https://img.shields.io/badge/discord-General_chat-738adb"></a>
+  <a href="https://twitter.com/intent/follow?screen_name=Hellarpay"><img alt="Follow on Twitter" src="https://img.shields.io/twitter/follow/Hellarpay.svg?style=social&label=Follow"></a>
+</p>
+
+Hellar Platform is a technology stack for building decentralized applications on
+the Hellar network. The two main architectural components, Drive and HAPI, turn
+the Hellar P2P network into a cloud that developers can integrate with their
+applications.
+
+If you are looking for how to contribute to the project or need any help with
+building an app on the Hellar Platform - message us on the [Devs
+Discord](https://chat.hellardevs.org/)!

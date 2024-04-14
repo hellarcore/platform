@@ -1,0 +1,87 @@
+const {
+  v0: {
+    BroadcastTransactionResponse,
+  },
+} = require('@hellarpro/hapi-grpc');
+
+const {
+  server: {
+    error: {
+      AlreadyExistsGrpcError,
+      InvalidArgumentGrpcError,
+      FailedPreconditionGrpcError,
+    },
+  },
+} = require('@hellarpro/grpc-common');
+
+const { Transaction } = require('@hellarpro/hellarcore-lib');
+
+/**
+ * @param {CoreRpcClient} coreRPCClient
+ * @returns {broadcastTransactionHandler}
+ */
+function broadcastTransactionHandlerFactory(coreRPCClient) {
+  /**
+   * @typedef broadcastTransactionHandler
+   * @param {Object} call
+   * @returns {Promise<BroadcastTransactionResponse>}
+   */
+  async function broadcastTransactionHandler(call) {
+    const { request } = call;
+
+    const serializedTransactionBinary = request.getTransaction();
+
+    if (!serializedTransactionBinary) {
+      throw new InvalidArgumentGrpcError('transaction is not specified');
+    }
+
+    const serializedTransaction = Buffer.from(serializedTransactionBinary);
+
+    // check transaction
+
+    let transactionInstance;
+    try {
+      transactionInstance = new Transaction(serializedTransaction);
+    } catch (e) {
+      throw new InvalidArgumentGrpcError(`invalid transaction: ${e.message}`);
+    }
+
+    const transactionIsValid = transactionInstance.verify();
+
+    if (transactionIsValid !== true) {
+      throw new InvalidArgumentGrpcError(`invalid transaction: ${transactionIsValid}`);
+    }
+
+    let transactionId;
+    try {
+      transactionId = await coreRPCClient.sendRawTransaction(serializedTransaction.toString('hex'));
+    } catch (e) {
+      // RPC_DESERIALIZATION_ERROR
+      // RPC_VERIFY_ERROR
+      if ([-22, -25].includes(e.code)) {
+        throw new InvalidArgumentGrpcError(`invalid transaction: ${e.message}`);
+      }
+
+      // RPC_VERIFY_REJECTED
+      if (e.code === -26) {
+        throw new FailedPreconditionGrpcError(`Transaction is rejected: ${e.message}`);
+      }
+
+      if (e.code === -27) {
+        // RPC_VERIFY_ALREADY_IN_CHAIN
+        throw new AlreadyExistsGrpcError(`Transaction already in chain: ${e.message}`);
+      }
+
+      throw e;
+    }
+
+    const response = new BroadcastTransactionResponse();
+    response.setTransactionId(transactionId);
+
+    return response;
+  }
+
+  return broadcastTransactionHandler;
+}
+
+module.exports = broadcastTransactionHandlerFactory;

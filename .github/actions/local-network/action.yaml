@@ -1,0 +1,99 @@
+---
+name: "Start local network"
+description: "Setup and start hellarmate local network"
+inputs:
+  image_org:
+    description: "Docker image organization"
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Setup Node.JS
+      uses: ./.github/actions/nodejs
+
+    - name: Restore JS build artifacts
+      uses: strophy/actions-cache@opendal-update
+      with:
+        bucket: multi-runner-cache-x1xibo9c
+        root: actions-cache
+        path: build-js-artifacts-${{ github.sha }}.tar
+        key: build-js-artifacts/${{ github.sha }}
+
+    - name: Unpack JS build artifacts archive
+      shell: bash
+      run: tar -xf build-js-artifacts-${{ github.sha }}.tar
+
+    - name: Get hellarmate fingerprint
+      id: hellarmate-fingerprint
+      shell: bash
+      run: echo "sha=$(git log -1 --format="%h" -- packages/hellarmate)" >> $GITHUB_OUTPUT
+
+    # TODO: Use upload artifacts action instead
+    - name: Restore local network data
+      id: local-network-data
+      uses: strophy/actions-cache/restore@opendal-update
+      with:
+        bucket: multi-runner-cache-x1xibo9c
+        root: local-network-data
+        path: |
+          /home/ubuntu/.hellarmate
+          **/.env
+          hellarmate_volumes_dump
+        key: local-network-volumes/${{ steps.hellarmate-fingerprint.outputs.sha }}
+
+    - name: Restore hellarmate volumes
+      run: ./scripts/hellarmate/volumes/restore.sh
+      shell: bash
+      if: steps.local-network-data.outputs.cache-hit == 'true'
+
+    - name: Setup local network
+      run: |
+        set -ex
+
+        # create tenderhellar blocks every 10s to speed up test suite
+        yarn hellarmate config set --config=local platform.drive.tenderhellar.consensus.createEmptyBlocksInterval "10s"
+
+        # collect drive logs for bench suite
+        yarn hellarmate config set --config=local platform.drive.abci.logs.stdout.level "trace"
+
+        ./scripts/setup_local_network.sh
+        ./scripts/configure_test_suite.sh
+        ./scripts/configure_dotenv.sh
+      shell: bash
+      if: steps.local-network-data.outputs.cache-hit != 'true'
+
+    - name: Dump hellarmate volumes
+      run: ./scripts/hellarmate/volumes/dump.sh
+      shell: bash
+      if: steps.local-network-data.outputs.cache-hit != 'true'
+
+    - name: Save local network data
+      uses: strophy/actions-cache/save@opendal-update
+      with:
+        bucket: multi-runner-cache-x1xibo9c
+        root: local-network-data
+        path: |
+          /home/ubuntu/.hellarmate
+          **/.env
+          hellarmate_volumes_dump
+        key: local-network-volumes/${{ steps.hellarmate-fingerprint.outputs.sha }}
+      if: steps.local-network-data.outputs.cache-hit != 'true'
+
+    - name: Configure pre-built docker images
+      shell: bash
+      run: |
+        SHA_TAG=sha-${{ github.sha }}
+        VERSION=$(cat package.json | jq -r '.version')
+
+        # Hellarmate helper
+        docker pull ${{ inputs.image_org }}/hellarmate-helper:$SHA_TAG
+        docker tag ${{ inputs.image_org }}/hellarmate-helper:$SHA_TAG hellarpay/hellarmate-helper:$VERSION
+
+        # Replace HAPI and Drive images with new org and tag in hellarmate config
+        sed -i -E "s/hellarpay\/(drive|hapi):[^\"]+/${{ inputs.image_org }}\/\1:${SHA_TAG}/g" /home/ubuntu/.hellarmate/config.json
+
+        cat /home/ubuntu/.hellarmate/config.json
+
+    - name: Start local network
+      shell: bash
+      run: yarn start

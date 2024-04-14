@@ -1,0 +1,183 @@
+version: '3.7'
+
+services:
+  hellarmate_helper:
+    image: ${HELLARMATE_HELPER_DOCKER_IMAGE:?err}
+    labels:
+      org.hellarmate.service.title: "Hellarmate Helper"
+    restart: unless-stopped
+    environment:
+      - LOCAL_UID=${LOCAL_UID:?err}
+      - LOCAL_GID=${LOCAL_GID:?err}
+    ports:
+      - 127.0.0.1:${HELLARMATE_HELPER_API_PORT:?err}:${HELLARMATE_HELPER_API_PORT:?err}
+    command: yarn workspace hellarmate helper ${CONFIG_NAME:?err}
+    volumes:
+      - ${HELLARMATE_HOME_DIR:?err}:/home/hellarmate/.hellarmate
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  core:
+    image: ${CORE_DOCKER_IMAGE:?err}
+    labels:
+      org.hellarmate.service.title: "Core"
+    restart: unless-stopped
+    ports:
+      - ${CORE_P2P_HOST:?err}:${CORE_P2P_PORT:?err}:${CORE_P2P_PORT:?err} # P2P
+      - ${CORE_RPC_HOST:?err}:${CORE_RPC_PORT:?err}:${CORE_RPC_PORT:?err} #RPC
+    volumes:
+      - core_data:/home/hellar
+      - ${HELLARMATE_HOME_DIR:?err}/${CONFIG_NAME:?err}/core/hellar.conf:/home/hellar/.hellarcore/hellar.conf:ro
+      - ${CORE_LOG_DIRECTORY_PATH:?err}:/var/log/hellar
+    command:
+      - hellard
+    stop_grace_period: 30s
+    environment:
+      # Solving issue under WSL when after restart container volume is not being mounted properly
+      # https://github.com/docker/for-win/issues/4812
+      # Following fix forces container recreation
+      - WSL2_FIX=${WSL2_FIX:-0}
+    profiles:
+      - core
+
+  drive_abci:
+    image: ${PLATFORM_DRIVE_ABCI_DOCKER_IMAGE:?err}
+    labels:
+      org.hellarmate.service.title: "Drive ABCI"
+    restart: unless-stopped
+    volumes:
+      - drive_abci_data:/var/lib/hellar/rs-drive-abci/db
+    environment:
+      - BLOCK_SPACING_MS=3000 # TODO: sync with tenderhellar
+      - CHAIN_ID=${PLATFORM_DRIVE_TENDERHELLAR_GENESIS_CHAIN_ID:-devnet}
+      - CORE_JSON_RPC_USERNAME=${CORE_RPC_USER:?err}
+      - CORE_JSON_RPC_PASSWORD=${CORE_RPC_PASSWORD:?err}
+      - CORE_JSON_RPC_HOST=core
+      - CORE_JSON_RPC_PORT=${CORE_RPC_PORT:?err}
+      - CORE_ZMQ_HOST=core
+      - CORE_ZMQ_PORT=29998
+      - HPNS_MASTER_PUBLIC_KEY=${PLATFORM_HPNS_MASTER_PUBLIC_KEY}
+      - HPNS_SECOND_PUBLIC_KEY=${PLATFORM_HPNS_SECOND_PUBLIC_KEY}
+      - HELLARPAY_MASTER_PUBLIC_KEY=${PLATFORM_HELLARPAY_MASTER_PUBLIC_KEY}
+      - HELLARPAY_SECOND_PUBLIC_KEY=${PLATFORM_HELLARPAY_SECOND_PUBLIC_KEY}
+      - EPOCH_TIME_LENGTH_S=${PLATFORM_DRIVE_ABCI_EPOCH_TIME}
+      - FEATURE_FLAGS_MASTER_PUBLIC_KEY=${PLATFORM_FEATURE_FLAGS_MASTER_PUBLIC_KEY}
+      - FEATURE_FLAGS_SECOND_PUBLIC_KEY=${PLATFORM_FEATURE_FLAGS_SECOND_PUBLIC_KEY}
+      - MASTERNODE_REWARD_SHARES_MASTER_PUBLIC_KEY=${PLATFORM_MASTERNODE_REWARD_SHARES_MASTER_PUBLIC_KEY}
+      - MASTERNODE_REWARD_SHARES_SECOND_PUBLIC_KEY=${PLATFORM_MASTERNODE_REWARD_SHARES_SECOND_PUBLIC_KEY}
+      - WITHDRAWALS_MASTER_PUBLIC_KEY=${PLATFORM_WITHDRAWALS_MASTER_PUBLIC_KEY}
+      - WITHDRAWALS_SECOND_PUBLIC_KEY=${PLATFORM_WITHDRAWALS_SECOND_PUBLIC_KEY}
+      - QUORUM_SIZE=5 # TODO: sync with Tenderhellar
+      - QUORUM_TYPE=${PLATFORM_DRIVE_ABCI_VALIDATOR_SET_LLMQ_TYPE:?err}
+      - NETWORK=${NETWORK:?err}
+      - TENDERHELLAR_P2P_PORT=${PLATFORM_DRIVE_TENDERHELLAR_P2P_PORT:?err}
+    stop_grace_period: 30s
+    env_file:
+      # Logger settings
+      - ${HELLARMATE_HOME_DIR:?err}/${CONFIG_NAME:?err}/platform/drive/abci/logger.env
+    profiles:
+      - platform
+
+  drive_tenderhellar:
+    image: ${PLATFORM_DRIVE_TENDERHELLAR_DOCKER_IMAGE:?err}
+    labels:
+      org.hellarmate.service.title: "Drive Tenderhellar"
+    restart: unless-stopped
+    depends_on:
+      - drive_abci
+    ports:
+      - ${PLATFORM_DRIVE_TENDERHELLAR_P2P_HOST:?err}:${PLATFORM_DRIVE_TENDERHELLAR_P2P_PORT:?err}:${PLATFORM_DRIVE_TENDERHELLAR_P2P_PORT:?err} # P2P
+      - ${PLATFORM_DRIVE_TENDERHELLAR_RPC_HOST}:${PLATFORM_DRIVE_TENDERHELLAR_RPC_PORT:?err}:${PLATFORM_DRIVE_TENDERHELLAR_RPC_PORT:?err} # RPC
+      - 127.0.0.1:${PLATFORM_DRIVE_TENDERHELLAR_PPROF_PORT:?err}:${PLATFORM_DRIVE_TENDERHELLAR_PPROF_PORT:?err} # pprof
+      - ${PLATFORM_DRIVE_TENDERHELLAR_METRICS_HOST:?err}:${PLATFORM_DRIVE_TENDERHELLAR_METRICS_PORT:?err}:${PLATFORM_DRIVE_TENDERHELLAR_METRICS_PORT:?err} # Metrics
+    volumes:
+      - drive_tenderhellar:/tenderhellar
+      - ${HELLARMATE_HOME_DIR:?err}/${CONFIG_NAME:?err}/platform/drive/tenderhellar:/tenderhellar/config:ro
+      - ${PLATFORM_DRIVE_TENDERHELLAR_LOG_DIRECTORY_PATH:?err}:/var/log/tenderhellar
+    stop_grace_period: 10s
+    profiles:
+      - platform
+
+  hapi_api:
+    image: ${PLATFORM_HAPI_API_DOCKER_IMAGE:?err}
+    labels:
+      org.hellarmate.service.title: "HAPI API"
+    restart: unless-stopped
+    depends_on:
+      - drive_tenderhellar
+    environment:
+      - API_JSON_RPC_PORT=3004
+      - API_GRPC_PORT=3005
+      - HELLARCORE_RPC_HOST=core
+      - HELLARCORE_RPC_PORT=${CORE_RPC_PORT:?err}
+      - HELLARCORE_RPC_USER=${CORE_RPC_USER:?err}
+      - HELLARCORE_RPC_PASS=${CORE_RPC_PASSWORD:?err}
+      - HELLARCORE_ZMQ_HOST=core
+      - HELLARCORE_ZMQ_PORT=29998
+      - HELLARCORE_P2P_HOST=core
+      - HELLARCORE_P2P_PORT=${CORE_P2P_PORT:?err}
+      - HELLARCORE_P2P_NETWORK=devnet
+      - NETWORK=devnet
+      - TENDERMINT_RPC_HOST=drive_tenderhellar
+      - TENDERMINT_RPC_PORT=${PLATFORM_DRIVE_TENDERHELLAR_RPC_PORT:?err}
+      - NODE_ENV=${ENVIRONMENT:?err}
+    command: --only api
+    stop_grace_period: 10s
+    profiles:
+      - platform
+
+  hapi_tx_filter_stream:
+    image: ${PLATFORM_HAPI_API_DOCKER_IMAGE:?err}
+    labels:
+      org.hellarmate.service.title: "HAPI Transactions Filter Stream"
+    restart: unless-stopped
+    environment:
+      - TX_FILTER_STREAM_GRPC_PORT=3006
+      - HELLARCORE_RPC_HOST=core
+      - HELLARCORE_RPC_PORT=${CORE_RPC_PORT:?err}
+      - HELLARCORE_RPC_USER=${CORE_RPC_USER:?err}
+      - HELLARCORE_RPC_PASS=${CORE_RPC_PASSWORD:?err}
+      - HELLARCORE_ZMQ_HOST=core
+      - HELLARCORE_ZMQ_PORT=29998
+      - HELLARCORE_P2P_HOST=core
+      - HELLARCORE_P2P_PORT=${CORE_P2P_PORT:?err}
+      - HELLARCORE_P2P_NETWORK=devnet
+      - NETWORK=devnet
+      - TENDERMINT_RPC_HOST=drive_tenderhellar
+      - TENDERMINT_RPC_PORT=26657
+    command: --only core-streams
+    stop_grace_period: 10s
+    profiles:
+      - platform
+
+  hapi_envoy:
+    image: ${PLATFORM_HAPI_ENVOY_DOCKER_IMAGE:?err}
+    labels:
+      org.hellarmate.service.title: "HAPI Envoy"
+    restart: unless-stopped
+    ports:
+      - ${PLATFORM_HAPI_ENVOY_HTTP_HOST:?err}:${PLATFORM_HAPI_ENVOY_HTTP_PORT:?err}:10000 # JSON RPC and gRPC Web & Native
+    depends_on:
+      - hapi_api
+      - hapi_tx_filter_stream
+    environment:
+      - ENVOY_UID=${LOCAL_UID:?err}
+      - ENVOY_GID=${LOCAL_GID:?err}
+    volumes:
+      - ${HELLARMATE_HOME_DIR:?err}/${CONFIG_NAME:?err}/platform/hapi/envoy/envoy.yaml:/etc/envoy/envoy.yaml:ro
+      - ${HELLARMATE_HOME_DIR:?err}/${CONFIG_NAME:?err}/platform/hapi/envoy/ssl/bundle.crt:/etc/ssl/bundle.crt:ro
+      - ${HELLARMATE_HOME_DIR:?err}/${CONFIG_NAME:?err}/platform/hapi/envoy/ssl/private.key:/etc/ssl/private.key:ro
+    stop_grace_period: 10s
+    profiles:
+      - platform
+
+volumes:
+  core_data:
+  drive_abci_data:
+  drive_abci_logs:
+  drive_tenderhellar:
+
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: ${DOCKER_NETWORK_SUBNET:?err}

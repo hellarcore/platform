@@ -1,0 +1,268 @@
+name: Release Platform
+
+on:
+  release:
+    types:
+      - published
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Version (i.e. v0.22.3-pre.2)"
+        required: true
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  release-npm:
+    name: Release NPM packages
+    runs-on: [ "self-hosted", "linux", "arm64", "ubuntu-platform" ]
+    timeout-minutes: 15
+    if: github.event_name != 'workflow_dispatch'
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Check package version matches tag
+        uses: geritol/match-tag-to-package-version@0.2.0
+        env:
+          TAG_PREFIX: v
+
+      - name: Configure AWS credentials and bucket region
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Retrieve JS build artifacts
+        uses: strophy/actions-cache@opendal-update
+        id: cache
+        with:
+          bucket: multi-runner-cache-x1xibo9c
+          root: actions-cache
+          path: build-js-artifacts-${{ github.sha }}.tar
+          key: build-js-artifacts/${{ github.sha }}
+
+      - name: Unpack JS build artifacts archive
+        run: tar -xf build-js-artifacts-${{ github.sha }}.tar
+        if: ${{ steps.cache.outputs.cache-hit == 'true' }}
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        if: ${{ steps.cache.outputs.cache-hit != 'true' }}
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Setup Rust
+        uses: ./.github/actions/rust
+        with:
+          target: wasm32-unknown-unknown
+        if: ${{ steps.cache.outputs.cache-hit != 'true' }}
+
+      - name: Setup Node.JS
+        uses: ./.github/actions/nodejs
+
+      - name: Build packages
+        run: yarn build
+        env:
+          CARGO_BUILD_PROFILE: release
+          RUSTC_WRAPPER: sccache
+          SCCACHE_BUCKET: multi-runner-cache-x1xibo9c
+          SCCACHE_REGION: ${{ vars.AWS_REGION }}
+          SCCACHE_S3_KEY_PREFIX: ${{ runner.os }}/sccache/wasm/wasm32
+        if: ${{ steps.cache.outputs.cache-hit != 'true' }}
+
+      - name: Set suffix
+        uses: actions/github-script@v6
+        id: suffix
+        with:
+          result-encoding: string
+          script: |
+            const fullTag = context.payload.release.tag_name;
+            if (fullTag.includes('-')) {
+              const [, fullSuffix] = fullTag.split('-');
+              const [suffix] = fullSuffix.split('.');
+              return suffix;
+            } else {
+              return '';
+            }
+
+      - name: Set NPM release tag
+        uses: actions/github-script@v6
+        id: tag
+        with:
+          result-encoding: string
+          script: |
+            const tag = context.payload.release.tag_name;
+            const [, major, minor] = tag.match(/^v([0-9]+)\.([0-9]+)/);
+            return (tag.includes('-') ? `${major}.${minor}-${{steps.suffix.outputs.result}}` : 'latest');
+
+      - name: Configure NPM auth token
+        run: yarn config set npmAuthToken ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish NPM packages
+        run: yarn workspaces foreach --all --no-private --parallel npm publish --access public --tag ${{ steps.tag.outputs.result }}
+
+      - name: Ignore only already cached artifacts
+        run: |
+          find . -name '.gitignore' -exec rm -f {} +
+          echo ".yarn" >> .gitignore
+          echo "target" >> .gitignore
+          echo "node_modules" >> .gitignore
+          echo ".nyc_output" >> .gitignore
+          echo ".idea" >> .gitignore
+          echo ".ultra.cache.json" >> .gitignore
+          echo "db/*" >> .gitignore
+        if: ${{ steps.cache.outputs.cache-hit != 'true' }}
+
+      - name: Get modified files
+        id: diff
+        run: git ls-files --others --exclude-standard >> artifacts_list.txt
+        if: ${{ steps.cache.outputs.cache-hit != 'true' }}
+
+      - name: Create an archive of built files
+        run: xargs -a artifacts_list.txt tar cvf build-js-artifacts-${{ github.sha }}.tar
+        if: ${{ steps.cache.outputs.cache-hit != 'true' }}
+
+  release-drive-image:
+    name: Release Drive image
+    secrets: inherit
+    uses: ./.github/workflows/release-docker-image.yml
+    with:
+      name: Drive
+      image_org: hellarpay
+      image_name: drive
+      target: drive-abci
+
+  release-drive-hapi:
+    name: Release HAPI image
+    secrets: inherit
+    uses: ./.github/workflows/release-docker-image.yml
+    with:
+      name: HAPI
+      image_org: hellarpay
+      image_name: hapi
+      target: hapi
+
+  release-test-suite-image:
+    name: Release Test Suite image
+    secrets: inherit
+    uses: ./.github/workflows/release-docker-image.yml
+    with:
+      name: Test Suite
+      image_org: hellarpay
+      image_name: platform-test-suite
+      target: test-suite
+
+  release-hellarmate-helper-image:
+    name: Release Hellarmate Helper image
+    secrets: inherit
+    uses: ./.github/workflows/release-docker-image.yml
+    with:
+      name: Hellarmate Helper
+      image_org: hellarpay
+      image_name: hellarmate-helper
+      target: hellarmate-helper
+
+  release-hellarmate-packages:
+    name: Release Hellarmate packages
+    runs-on: ${{ matrix.os }}
+    needs: release-npm
+    permissions:
+      id-token: write # s3 cache
+      contents: write # update release artifacts
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - package_type: tarballs
+            os: ubuntu-22.04
+          - package_type: win
+            os: ubuntu-22.04
+          - package_type: deb
+            os: ubuntu-22.04
+          - package_type: macos
+            os: macos-12
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+        with:
+            fetch-depth: 0
+
+      - name: Configure AWS credentials and bucket region
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: ${{ vars.AWS_ROLE_TO_ASSUME }}
+
+      - name: Retrieve JS build artifacts
+        uses: strophy/actions-cache@opendal-update
+        with:
+          bucket: multi-runner-cache-x1xibo9c
+          root: actions-cache
+          path: build-js-artifacts-${{ github.sha }}.tar
+          key: build-js-artifacts/${{ github.sha }}
+
+      - name: Unpack JS build artifacts archive
+        run: tar -xf build-js-artifacts-${{ github.sha }}.tar
+
+      - name: Install macOS build deps
+        if: runner.os == 'macOS'
+        run: |
+          brew install llvm docker colima coreutils
+          colima start
+          echo "/usr/local/opt/llvm/bin" >> $GITHUB_PATH
+
+      - name: Install the Apple certificate
+        if: runner.os == 'macOS'
+        env:
+          BUILD_CERTIFICATE_BASE64: ${{ secrets.MACOS_BUILD_CERTIFICATE_BASE64 }}
+          P12_PASSWORD: ${{ secrets.MACOS_P12_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.MACOS_KEYCHAIN_PASSWORD }}
+        run: |
+          # create variables
+          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+
+          # import certificate and provisioning profile from secrets
+          echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+
+          # create temporary keychain
+          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+
+          # import certificate to keychain
+          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH
+
+      - name: Install Linux build deps
+        if: runner.os == 'Linux'
+        run: sudo apt-get install -y nsis
+
+      - name: Setup Node.JS
+        uses: ./.github/actions/nodejs
+
+      - name: Create package
+        env:
+          OSX_KEYCHAIN: $RUNNER_TEMP/app-signing.keychain-db
+        run: "${GITHUB_WORKSPACE}/scripts/pack_hellarmate.sh ${{ matrix.package_type }}"
+
+      - name: Upload artifacts to action summary
+        uses: actions/upload-artifact@v3
+        if: github.event_name != 'release'
+        with:
+          name: hellarmate
+          path: packages/hellarmate/dist/**
+
+      - name: Notarize MacOS Release Build
+        if: runner.os == 'macOS'
+        run: |
+          find packages/hellarmate/dist/ -name '*.pkg' -exec sh -c 'xcrun notarytool submit "{}" --apple-id "${{ secrets.MACOS_APPLE_ID }}" --team-id "${{ secrets.MACOS_TEAM_ID }}" --password "${{ secrets.MACOS_NOTARIZING_PASSWORD }}" --wait;' \;
+
+      - name: Upload artifacts to release
+        uses: softprops/action-gh-release@v0.1.15
+        if: github.event_name == 'release'
+        with:
+          files: packages/hellarmate/dist/**

@@ -1,0 +1,15 @@
+[package]
+name = "platform-version"
+authors = ["UraGun <hellarpay@hellar.io>"]
+description = "Bincode based serialization and deserialization"
+version = "2.0.15"
+edition = "2024"
+rust-version = "1.73"
+license = "MIT"
+private = true
+
+[dependencies]
+thiserror = { version = "1.0" }
+
+[features]
+mock-versions = []

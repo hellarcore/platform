@@ -1,0 +1,67 @@
+{
+  "name": "@hellarpro/hapi-grpc",
+  "version": "2.0.15",
+  "description": "HAPI GRPC definition file and generated clients",
+  "browser": "browser.js",
+  "main": "node.js",
+  "scripts": {
+    "build": "yarn exec scripts/build.sh",
+    "lint": "eslint .",
+    "prepublishOnly": "yarn run build",
+    "test": "yarn run test:unit",
+    "test:unit": "mocha './test/unit/**/*.spec.js'"
+  },
+  "contributors": [
+    {
+      "name": "Ivan Shumkov",
+      "email": "shumkov@hellar.io",
+      "url": "https://github.com/shumkov"
+    },
+    {
+      "name": "Anton Suprunchuk",
+      "email": "anton.suprunchuk@hellar.io",
+      "url": "https://github.com/antouhou"
+    },
+    {
+      "name": "Samuel Westrich",
+      "email": "sam@hellar.io"
+    },
+    {
+      "name": "Igor Markin",
+      "email": "igor.markin@hellar.io"
+    },
+    {
+      "name": "Łukasz Klimek",
+      "email": "lukasz.klimek@hellar.io"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hellarpro/hapi-grpc.git"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hellarpro/hapi-grpc/issues"
+  },
+  "homepage": "https://github.com/hellarpro/hapi-grpc#readme",
+  "dependencies": {
+    "@hellarpro/grpc-common": "workspace:*",
+    "@hellarpro/protobufjs": "6.10.5",
+    "@grpc/grpc-js": "1.4.4",
+    "@improbable-eng/grpc-web": "^0.15.0",
+    "google-protobuf": "^3.12.2",
+    "long": "^5.2.0"
+  },
+  "devDependencies": {
+    "chai": "^4.3.10",
+    "chai-as-promised": "^7.1.1",
+    "dirty-chai": "^2.0.1",
+    "eslint": "^8.53.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.29.0",
+    "mocha": "^10.2.0",
+    "mocha-sinon": "^2.1.2",
+    "sinon": "^17.0.1",
+    "sinon-chai": "^3.7.0"
+  }
+}

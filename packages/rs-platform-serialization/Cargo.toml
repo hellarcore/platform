@@ -1,0 +1,13 @@
+[package]
+name = "platform-serialization"
+authors = ["UraGun <hellarpay@hellar.io>"]
+description = "Bincode based serialization and deserialization"
+version = "2.0.15"
+edition = "2024"
+rust-version = "1.73"
+license = "MIT"
+private = true
+
+[dependencies]
+bincode = { version = "2.0.0-rc.3", features = ["serde"] }
+platform-version = { path = "../rs-platform-version" }

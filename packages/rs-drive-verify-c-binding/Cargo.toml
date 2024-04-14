@@ -1,0 +1,20 @@
+[package]
+name = "rs-drive-verify-c-binding"
+version = "0.25.16-rc.3"
+edition = "2021"
+rust-version = "1.73"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+name = "drive"
+crate-type = ["staticlib"]
+
+[build-dependencies]
+cbindgen = "0.24.3"
+
+[dependencies]
+
+[dependencies.drive]
+path = "../rs-drive"
+features = ["verify"]
+default-features = false

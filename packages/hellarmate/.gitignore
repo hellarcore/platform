@@ -1,0 +1,6 @@
+# Oclif
+*-debug.log
+*-error.log
+.yo-repository
+dist
+tmp

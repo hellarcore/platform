@@ -1,0 +1,7 @@
+{
+  "id": "{{=it.platform.drive.tenderhellar.node.id}}",
+  "priv_key": {
+    "type": "tendermint/PrivKeyEd25519",
+    "value": "{{=it.platform.drive.tenderhellar.node.key}}"
+  }
+}

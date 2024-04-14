@@ -1,0 +1,25 @@
+{
+  "network": "{{= it.network }}",
+  "port": {{= it.core.insight.port }},
+  "services": [
+    "hellard",
+    "@hellarpro/insight-api",
+    {{? it.core.insight.ui.enabled }}"@hellarpro/insight-ui",{{?}}
+    "web"
+  ],
+  "servicesConfig": {
+    "hellard": {
+      "connect": [{
+        "rpchost": "core",
+        "rpcport": {{= it.core.rpc.port }},
+        "rpcuser": "{{= it.core.rpc.user }}",
+        "rpcpassword": "{{= it.core.rpc.password }}",
+        "zmqpubrawtx": "tcp://core:29998",
+        "zmqpubhashblock": "tcp://core:29998"
+      }]
+    },
+    "@hellarpro/insight-api": {
+      "disableRateLimiter": true
+    }
+  }
+}

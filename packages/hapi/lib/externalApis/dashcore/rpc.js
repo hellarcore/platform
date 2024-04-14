@@ -1,0 +1,369 @@
+const RpcClient = require('@hellarpro/hellard-rpc');
+const hellarcoreRpcError = require('../../errors/hellarcoreRpcError');
+const constants = require('./constants');
+const config = require('../../config');
+
+const client = new RpcClient(config.hellarcore.rpc);
+
+/**
+ *  Layer 1 endpoints
+ *  These functions represent endpoints on the transactional layer
+ *  and can be requested from any random HAPI node.
+ *  Once a HAPI-client is assigned to a quorum it should exclude its quorum nodes
+ *  from the set of nodes serving L1 endpoints for privacy reasons
+ */
+
+function generateToAddress(blocksNumber, address) {
+  return new Promise((resolve, reject) => { // not exist?
+    client.generateToAddress(blocksNumber, address, (err, r) => {
+      if (err) {
+        reject(new hellarcoreRpcError(err.message, null, err.code));
+      } else {
+        resolve(r.result);
+      }
+    });
+  });
+}
+
+const getBestBlockHash = () => new Promise((resolve, reject) => {
+  client.getbestblockhash((err, r) => {
+    if (err) {
+      reject(new hellarcoreRpcError(err.message, null, err.code));
+    } else {
+      resolve(r.result);
+    }
+  });
+});
+
+const getBestBlockHeight = () => new Promise((resolve, reject) => {
+  client.getblockcount((err, r) => {
+    if (err) {
+      reject(new hellarcoreRpcError(err.message, null, err.code));
+    } else {
+      resolve(r.result);
+    }
+  });
+});
+
+const getBestChainLock = () => new Promise((resolve, reject) => {
+  client.getbestchainlock((err, r) => {
+    if (err) {
+      reject(new hellarcoreRpcError(err.message, null, err.code));
+    } else {
+      resolve(r.result);
+    }
+  });
+});
+
+const getBlock = (hash, isParsed = 1) => new Promise((resolve, reject) => {
+  client.getblock(hash, isParsed, (err, r) => {
+    if (err) {
+      reject(new hellarcoreRpcError(err.message, null, err.code));
+    } else {
+      resolve(r.result);
+    }
+  });
+});
+
+const getBlockHash = (index) => new Promise((resolve, reject) => {
+  client.getblockhash(index, (err, r) => {
+    if (err) {
+      reject(new hellarcoreRpcError(err.message, null, err.code));
+    } else {
+      resolve(r.result);
+    }
+  });
+});
+
+const getBlockHeader = (blockHash, verbose = false) => new Promise((resolve, reject) => {
+  client.getblockheader(blockHash, verbose, (err, r) => {
+    if (err) {
+      reject(new hellarcoreRpcError(err.message, null, err.code));
+    } else {
+      resolve(r.result);
+    }
+  });
+});
+
+const getBlockHeaders = (
+  fromBlockHash,
+  limit = 1,
+  verbose = false,
+) => new Promise((resolve, reject) => {
+  client.getblockheaders(fromBlockHash, limit, verbose, (err, r) => {
+    if (err) {
+      reject(new hellarcoreRpcError(err.message, null, err.code));
+    } else {
+      resolve(r.result);
+    }
+  });
+});
+
+const getMasternodesList = () => new Promise((resolve, reject) => {
+  client.masternodelist((err, r) => {
+    if (err) {
+      reject(new hellarcoreRpcError(err.message, null, err.code));
+    } else {
+      resolve(r.result);
+    }
+  });
+});
+
+const getMempoolInfo = () => new Promise((resolve, reject) => {
+  client.getmempoolinfo((err, r) => {
+    if (err) {
+      reject(new hellarcoreRpcError(err.message, null, err.code));
+    } else {
+      resolve(r.result);
+    }
+  });
+});
+
+const getRawMemPool = (verbose) => new Promise((resolve, reject) => {
+  client.getrawmempool(verbose, (err, r) => {
+    if (err) {
+      reject(new hellarcoreRpcError(err.message, null, err.code));
+    } else {
+      resolve(r.result);
+    }
+  });
+});
+
+const getMnListDiff = (baseBlockHash, blockHash) => new Promise((resolve, reject) => {
+  client.protx(constants.HELLARCORE_RPC_COMMANDS.protx.diff, baseBlockHash, blockHash, (err, r) => {
+    if (err) {
+      reject(new hellarcoreRpcError(err.message, null, err.code));
+    } else {
+      resolve(r.result);
+    }
+  });
+});
+
+const getMnSync = (command) => new Promise((resolve, reject) => {
+  client.mnsync(command, (err, r) => {
+    if (err) {
+      reject(new hellarcoreRpcError(err.message, null, err.code));
+    } else {
+      resolve(r.result);
+    }
+  });
+});
+
+const getMasternode = (command) => new Promise((resolve, reject) => {
+  client.masternode(command, (err, r) => {
+    if (err) {
+      reject(new hellarcoreRpcError(err.message, null, err.code));
+    } else {
+      resolve(r.result);
+    }
+  });
+});
+
+const getRawTransaction = (txid, verboseMode = 0) => new Promise((resolve, reject) => {
+  client.getrawtransaction(txid, verboseMode, (err, r) => {
+    if (err) {
+      reject(new hellarcoreRpcError(err.message, null, err.code));
+    } else {
+      resolve(r.result);
+    }
+  });
+});
+
+const getRawBlock = (blockhash) => getBlock(blockhash, false);
+
+// This is only for in-wallet transaction
+const getTransaction = (txid) => new Promise((resolve, reject) => {
+  client.gettransaction(txid, (err, r) => {
+    if (err) {
+      reject(new hellarcoreRpcError(err.message, null, err.code));
+    } else {
+      resolve(r.result);
+    }
+  });
+});
+
+const getTransactionFirstInputAddress = (txId) => new Promise((resolve, reject) => {
+  client.gettransaction(txId, (err, r) => {
+    if (err) {
+      reject(new hellarcoreRpcError(err.message, null, err.code));
+    } else {
+      resolve(r.details.address);
+    }
+  });
+});
+
+const getUser = (txId) => new Promise((resolve, reject) => { // not exist?
+  client.getuser(txId, (err, r) => {
+    if (err) {
+      reject(new hellarcoreRpcError(err.message, null, err.code));
+    } else {
+      resolve(r.result);
+    }
+  });
+});
+
+// Address indexing needs to be enabled
+const getUTXO = (addr) => new Promise((resolve, reject) => {
+  client.getaddressutxos(addr, (err, r) => {
+    if (err) {
+      reject(new hellarcoreRpcError(err.message, null, err.code));
+    } else {
+      resolve(r.result);
+    }
+  });
+});
+
+/**
+ *
+ * @param {string} bloomFilter - hex string representing serialized bloom filter
+ * @param {string} fromBlockHash - block hash as a hex string
+ * @param {number} [count] - how many blocks to scan. Max 2000
+ * @return {Promise<string[]>} - serialized merkle blocks
+ */
+const getMerkleBlocks = (bloomFilter, fromBlockHash, count) => new Promise((resolve, reject) => {
+  client.getMerkleBlocks(bloomFilter, fromBlockHash, count, (error, response) => {
+    if (error) {
+      reject(new hellarcoreRpcError(error.message));
+    } else {
+      resolve(response.result);
+    }
+  });
+});
+
+/**
+ *  Layer 2 endpoints
+ *  These functions represent endpoints on the data layer
+ *  and can be requested only from members of the quorum assigned to a specific HAPI-client
+ */
+
+const sendRawTransition = (ts) => new Promise((resolve, reject) => { // not exist?
+  client.sendrawtransition(ts, (err, r) => {
+    if (err) {
+      reject(new hellarcoreRpcError(err.message, null, err.code));
+    } else {
+      resolve(r.result);
+    }
+  });
+});
+
+/**
+ *  Layer 1 or Layer 2 endpoints
+ *  depending on context these functions are either Layer 1 or Layer 2
+ *  e.g. sendRawTransaction can be used to send a normal tx => Layer 1,
+ *  but can also be used like its alias sendRawTransition to send
+ *  a state transition updating a BU account => Layer 2.
+ *  A HAPI-client will need to know if it has already been assigned
+ *  a quorum in order to choose which set of HAPI nodes to use
+ *  for posting a tx to this endpoint -
+ *  all HAPI nodes or just it's quorum member nodes
+ */
+
+const sendRawTransaction = (tx) => new Promise((resolve, reject) => {
+  client.sendrawtransaction(tx, (err, r) => {
+    if (err) {
+      reject(new hellarcoreRpcError(err.message, null, err.code));
+    } else {
+      resolve(r.result);
+    }
+  });
+});
+
+const sendRawIxTransaction = (tx) => new Promise((resolve, reject) => {
+  client.sendrawtransaction(tx, false, true, (err, r) => {
+    if (err) {
+      reject(new hellarcoreRpcError(err.message, null, err.code));
+    } else {
+      resolve(r.result);
+    }
+  });
+});
+
+const getNetworkInfo = () => new Promise((resolve, reject) => {
+  client.getnetworkinfo((err, r) => {
+    if (err) {
+      reject(new hellarcoreRpcError(err.message, null, err.code));
+    } else {
+      resolve(r.result);
+    }
+  });
+});
+
+const getBlockchainInfo = () => new Promise((resolve, reject) => {
+  client.getblockchaininfo((err, r) => {
+    if (err) {
+      reject(new hellarcoreRpcError(err.message, null, err.code));
+    } else {
+      resolve(r.result);
+    }
+  });
+});
+
+const getBlockStats = (hashOrHeight, topics) => new Promise((resolve, reject) => {
+  client.getblockstats(hashOrHeight, topics, (err, r) => {
+    if (err) {
+      reject(new hellarcoreRpcError(err.message, null, err.code));
+    } else {
+      resolve(r.result);
+    }
+  });
+});
+
+/**
+ * @typedef CoreRpcClient
+ * @type {{
+ * getMempoolInfo: (function(): Promise<any>),
+ * sendRawTransaction: (function(*=): Promise<any>),
+ * getBlock: (function(*=, *=): Promise<any>),
+ * getUser: (function(*=): Promise<any>),
+ * getUTXO: (function(*=): Promise<any>),
+ * getBlockHash: (function(*=): Promise<any>),
+ * getBestBlockHash: (function(): Promise<any>),
+ * getBestChainLock: (function(): Promise<any>),
+ * getMnListDiff: (function(*=, *=): Promise<any>),
+ * getMnSync: (function(*=, *=): Promise<any>),
+ * getMasternode: (function(*=, *=): Promise<any>),
+ * getBlockHeaders: (function(*=, *=, *=): Promise<any>),
+ * getRawTransaction: (function(*=): Promise<any>),
+ * getTransactionFirstInputAddress: (function(*=): Promise<any>),
+ * getBlockHeader: (function(*=): Promise<any>),
+ * getBlockchainInfo: (function(): Promise<any>),
+ * getNetworkInfo: (function(): Promise<any>),
+ * sendRawIxTransaction: (function(*=): Promise<any>),
+ * getRawBlock: (function(*=): (*|Promise<any>)),
+ * getQuorum: (function(*=): Promise<any>),
+ * getMasternodesList: (function(): Promise<any>),
+ * getBestBlockHeight: (function(): Promise<any>),
+ * sendRawTransition: (function(*=): Promise<any>),
+ * generateToAddress: (function(*=): Promise<any>),
+ * getTransaction: (function(*=): Promise<any>),
+ * getMerkleBlocks: (function(string, string, number): Promise<string[]>)}}
+ */
+module.exports = {
+  generateToAddress,
+  getBestBlockHash,
+  getBestBlockHeight,
+  getBestChainLock,
+  getBlockHash,
+  getBlock,
+  getBlockHeader,
+  getBlockHeaders,
+  getBlockStats,
+  getMasternodesList,
+  getMempoolInfo,
+  getMnListDiff,
+  getMnSync,
+  getMasternode,
+  sendRawTransition,
+  sendRawTransaction,
+  sendRawIxTransaction,
+  getRawTransaction,
+  getRawBlock,
+  getTransaction,
+  getTransactionFirstInputAddress,
+  getUser,
+  getUTXO,
+  getMerkleBlocks,
+  getBlockchainInfo,
+  getNetworkInfo,
+  getRawMemPool,
+};

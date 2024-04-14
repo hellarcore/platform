@@ -1,0 +1,165 @@
+{
+  "name": "hellarmate",
+  "version": "2.0.15",
+  "description": "Distribution package for Hellar node installation",
+  "scripts": {
+    "lint": "eslint .",
+    "postpack": "rm -f oclif.manifest.json",
+    "prepack": "oclif manifest && oclif readme",
+    "version": "oclif readme && git add README.md",
+    "test": "yarn run test:unit && yarn run test:e2e",
+    "test:unit": "mocha --recursive test/unit",
+    "test:e2e": "mocha --recursive test/e2e",
+    "helper": "node scripts/helper.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hellarpro/hellarmate.git"
+  },
+  "type": "module",
+  "bin": "./bin/run.js",
+  "contributors": [
+    {
+      "name": "Ivan Shumkov",
+      "email": "ivan@shumkov.ru",
+      "url": "https://github.com/shumkov"
+    },
+    {
+      "name": "Djavid Gabibiyan",
+      "email": "djavid@hellar.io",
+      "url": "https://github.com/jawid-h"
+    },
+    {
+      "name": "Anton Suprunchuk",
+      "email": "anton.suprunchuk@hellar.io",
+      "url": "https://github.com/antouhou"
+    },
+    {
+      "name": "Konstantin Shuplenkov",
+      "email": "konstantin.shuplenkov@hellar.io",
+      "url": "https://github.com/shuplenkov"
+    },
+    {
+      "name": "Mikhail Pshenichnikov",
+      "email": "pshenmic@gmail.com",
+      "url": "https://github.com/pshenmic"
+    }
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hellarpro/hellarmate/issues"
+  },
+  "homepage": "https://github.com/hellarpro/hellarmate#readme",
+  "dependencies": {
+    "@babel/core": "^7.23.3",
+    "@babel/eslint-parser": "^7.23.3",
+    "@hellarpro/bls": "~1.2.9",
+    "@hellarpro/hellarcore-lib": "~0.21.0",
+    "@hellarpro/hellard-rpc": "^18.2.0",
+    "@hellarpro/hellarpay-contract": "workspace:*",
+    "@hellarpro/docker-compose": "^0.24.4",
+    "@hellarpro/hpns-contract": "workspace:*",
+    "@hellarpro/feature-flags-contract": "workspace:*",
+    "@hellarpro/masternode-reward-shares-contract": "workspace:*",
+    "@hellarpro/wallet-lib": "workspace:*",
+    "@hellarpro/withdrawals-contract": "workspace:*",
+    "@oclif/core": "^3.10.8",
+    "@oclif/plugin-help": "^6.0.5",
+    "ajv": "^8.6.0",
+    "ajv-formats": "^2.1.1",
+    "awilix": "^4.2.6",
+    "begoo": "^2.0.2",
+    "chalk": "^4.1.0",
+    "cron": "^2.1.0",
+    "dockerode": "^3.3.5",
+    "dot": "^1.1.3",
+    "dotenv": "^8.6.0",
+    "enquirer": "github:hellarpay/enquirer#patch-1",
+    "glob": "^10.3.4",
+    "hasbin": "^1.2.3",
+    "is-wsl": "2.2.0",
+    "jayson": "^4.1.0",
+    "js-yaml": "^4.1.0",
+    "listr2": "5.0.7",
+    "lohellar": "^4.17.21",
+    "memory-streams": "^0.1.3",
+    "node-forge": "^1.3.1",
+    "node-graceful": "^3.0.1",
+    "pretty-bytes": "^5.3.0",
+    "pretty-ms": "^7.0.0",
+    "public-ip": "^6.0.1",
+    "qs": "^6.11.0",
+    "rxjs": "^6.6.7",
+    "semver": "^7.5.3",
+    "table": "^6.8.1",
+    "wrap-ansi": "^7.0.0"
+  },
+  "devDependencies": {
+    "chai": "^4.3.10",
+    "chai-as-promised": "^7.1.1",
+    "dirty-chai": "^2.0.1",
+    "eslint": "^8.53.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.29.0",
+    "globby": "^11",
+    "mocha": "^10.2.0",
+    "mocha-sinon": "^2.1.2",
+    "oclif": "^4.0.3",
+    "sinon": "^17.0.1",
+    "sinon-chai": "^3.7.0"
+  },
+  "resolutions": {
+    "cpu-features": "https://registry.yarnpkg.com/@favware/skip-dependency/-/skip-dependency-1.2.1.tgz"
+  },
+  "files": [
+    "bin",
+    "configs",
+    "docker",
+    "src",
+    "templates",
+    "docker-compose.*",
+    "oclif.manifest.json",
+    "npm-shrinkwrap.json"
+  ],
+  "oclif": {
+    "additionalHelpFlags": [
+      "-h"
+    ],
+    "commands": "./src/commands",
+    "bin": "hellarmate",
+    "macos": {
+      "identifier": "org.hellar.hellarmate",
+      "sign": "'Developer ID Installer: The Hellar Foundation, Inc.'"
+    },
+    "plugins": [
+      "@oclif/plugin-help"
+    ],
+    "topics": {
+      "config": {
+        "description": "Manage configs"
+      },
+      "core": {
+        "description": "Manage Core"
+      },
+      "group": {
+        "description": "Orchestrate a group of nodes"
+      },
+      "platform": {
+        "description": "Manage Platform"
+      },
+      "ssl": {
+        "description": "Manage SSL"
+      },
+      "status": {
+        "description": "Show node status details"
+      },
+      "wallet": {
+        "description": "Wallet related commands"
+      }
+    },
+    "topicSeparator": " "
+  }
+}
