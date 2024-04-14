@@ -11,9 +11,9 @@
 
 <p align="center">
   <a href="https://github.com/hellarpay/platform/actions/workflows/all-packages.yml"><img alt="GitHub CI Status" src="https://github.com/hellarpay/platform/actions/workflows/all-packages.yml/badge.svg"></a>
-  <a href="https://chat.hellardevs.org/"><img alt="Devs Chat" src="https://img.shields.io/badge/discord-Dev_chat-738adb"></a>
-  <a href="https://discordapp.com/invite/PXbUxJB"><img alt="General Chat" src="https://img.shields.io/badge/discord-General_chat-738adb"></a>
-  <a href="https://twitter.com/intent/follow?screen_name=Hellarpay"><img alt="Follow on Twitter" src="https://img.shields.io/twitter/follow/Hellarpay.svg?style=social&label=Follow"></a>
+  <a href="https://discord.gg/4yfHvQFWRS/"><img alt="Devs Chat" src="https://discord.gg/4yfHvQFWRS"></a>
+  <a href="https://discord.gg/4yfHvQFWRS"><img alt="General Chat" src="https://discord.gg/4yfHvQFWRS"></a>
+  <a href="https://twitter.com/HellarCoin"><img alt="Follow on Twitter" src="https://img.shields.io/twitter/follow/Hellarpay.svg?style=social&label=Follow"></a>
 </p>
 
 Hellar Platform is a technology stack for building decentralized applications on
@@ -23,7 +23,7 @@ applications.
 
 If you are looking for how to contribute to the project or need any help with
 building an app on the Hellar Platform - message us on the [Devs
-Discord](https://chat.hellardevs.org/)!
+Discord]("https://discord.gg/4yfHvQFWRS/)!
 
 ## Note: Hellar Platform is currently available on the Hellar Testnet only
 
@@ -41,9 +41,9 @@ Hellar Platform is currently undergoing testing and final development necessary 
 support its release on the Hellar production network (mainnet). The packages in
 this repository may be used on the following networks:
 
-- [x] **Development networks** ([**devnets**](https://hellarplatform.readme.io/docs/reference-glossary#devnet))
-- [x] [**Testnet**](https://hellarplatform.readme.io/docs/reference-glossary#testnet)
-- [ ] [Mainnet](https://hellarplatform.readme.io/docs/reference-glossary#mainnet)
+- [x] **Development networks** ([**devnets**](https://hellarwiki.notion.site/Glossary-0587241d791b40c0b9871557ae210f55))
+- [x] [**Testnet**](https://hellarwiki.notion.site/Glossary-0587241d791b40c0b9871557ae210f55)
+- [ ] [Mainnet](https://hellarwiki.notion.site/Connect-to-a-network-2b5e9851a40843f68eef4abfcedf0a99#4d608255cb0f4e858a0323c6784c77d5)
 
 ## FAQ
 
@@ -87,12 +87,12 @@ this repository may be used on the following networks:
 ### Looking for support?
 
 For questions and support, please join our [Devs
-Discord](https://chat.hellardevs.org/)
+Discord](https://discord.gg/4yfHvQFWRS/)
 
 ### Where are the docs?
 
 Our docs are hosted on
-[readme.io](https://hellarplatform.readme.io/docs/introduction-what-is-hellar-platform).
+[readme.io](https://hellarwiki.notion.site/Hellar-Platform-def13bddaba64a9d944b4f3ed5fd7941).
 You can create issues and feature requests in the
 [issues](https://github.com/hellarpay/platform/issues) for this repository.
 
@@ -105,10 +105,10 @@ issue template at [platform/issues](https://github.com/hellarpay/platform/issues
 
 Check out:
 
-- Our [Developers Discord](https://chat.hellardevs.org/)
+- Our [Developers Discord](https://discord.gg/4yfHvQFWRS/)
 - Our [CONTRIBUTING.md](CONTRIBUTING.md) to get started with setting up the
   repo.
-- Our [news](https://www.hellar.io/news/) and [blog](https://www.hellar.io/blog/) which contains release posts and
+- Our [news](https://discord.gg/4yfHvQFWRS/) and [blog](https://discord.gg/4yfHvQFWRS/) which contains release posts and
   explanations.
 
 ## License

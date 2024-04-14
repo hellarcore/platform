@@ -2,7 +2,7 @@
 
 The Hellar Platform provides a technology stack on the top of Hellar Network that allows creation of feature-rich decentralized applications. 
 
-You can learn more from the [Hellar Platform Documentation - What is Hellar Platform?](https://hellarplatform.readme.io/docs/introduction-what-is-hellar-platform)
+You can learn more from the [Hellar Platform Documentation - What is Hellar Platform?](https://hellarwiki.notion.site/Hellar-Platform-def13bddaba64a9d944b4f3ed5fd7941)
 
 ### Platform components
 
