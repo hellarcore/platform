@@ -1,7 +1,7 @@
 : <!-- markdownlint-disable MD033 MD041 -->
 <p align="center">
-  <a href="https://hellarplatform.readme.io/docs/introduction-what-is-hellar-platform/">
-    <img alt="babel" src="https://media.hellar.io/wp-content/uploads/hellar_digital-cash_logo_2018_rgb_for_screens.png" width="546">
+  <a href="https://hellarwiki.notion.site/Hellar-Platform-def13bddaba64a9d944b4f3ed5fd7941/">
+    <img alt="babel" src="https://github.com/hellarcore/hellar/blob/master/src/qt/res/images/hellar.png" width="546">
   </a>
 </p>
 
